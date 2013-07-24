@@ -17,7 +17,7 @@ package org.vertx.mods.tests;
  */
 
 import org.junit.Test;
-import org.vertx.java.framework.TestBase;
+import org.vertx.java.testframework.TestBase;
 
 /**
  *
@@ -39,6 +39,11 @@ public class JavaScriptPersistorTest extends TestBase {
 
   @Test
   public void testSave() throws Exception {
+    startTest(getMethodName());
+  }
+  
+  @Test
+  public void testUpsert() throws Exception {
     startTest(getMethodName());
   }
 

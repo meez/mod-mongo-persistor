@@ -15,6 +15,7 @@
  */
 
 apply plugin: 'java'
+apply plugin: 'idea'
 
 defaultTasks = ['assemble']
 
@@ -80,13 +81,18 @@ task prepareVertxTest(type: Sync, dependsOn: 'copyMod' ) {
 test {
   // Can't have the app on the vert.x classpath
   classpath = files( classpath.findAll {
-    !( it.toString() ==~ /.+build\/(classes|resources)\/main$/ )
+    !( it.toString() ==~ /.+build.(classes|resources).main$/ )
   } )
 
   // Some vert.x properties
   systemProperty 'vertx.test.timeout', 15
   systemProperty 'vertx.mods', "$projectDir/build/tmp/mod-test"
   systemProperty 'vertx.version', "$project.version"
+  
+  // Overrides to specific remote host/auth
+  //systemProperty 'test.mongo.host','localhost'
+  //systemProperty 'test.mongo.username','username'
+  //systemProperty 'test.mongo.password','password'
 
   // Show output
   testLogging.showStandardStreams = true

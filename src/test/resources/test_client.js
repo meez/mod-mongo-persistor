@@ -69,6 +69,10 @@ function testSave() {
         tu.azzert(reply.status === 'ok');
         tu.azzert(reply.result.name === 'tim');
         tu.azzert(reply.result.age === 1000);
+        // Save removes other attributes
+        tu.azzert(reply.result.pi == null);
+        tu.azzert(reply.result.male == null);
+        tu.azzert(reply.result.cheeses == null);
 
         // Do an update with a different WriteConcern
         eb.send('test.persistor', {
@@ -95,6 +99,53 @@ function testSave() {
           });
           tu.testComplete();
         });
+      });
+    });
+  });
+}
+
+function testUpsert() {
+  // First upsert will insert
+  eb.send('test.persistor', {
+    collection: 'testcoll',
+    action: 'update',
+    upsert: true,
+    criteria: {
+      '_id':'12345'
+    },
+    objNew: {
+      '$set': {'name':'roger','age':15}
+    }
+  }, function(reply) {
+    tu.azzert(reply.status === 'ok');
+
+    // Now update it
+    eb.send('test.persistor', {
+      collection: 'testcoll',
+      action: 'update',
+      upsert: true,
+      criteria: {
+        '_id':'12345'
+      },
+      objNew: {
+        '$set': {'age':1000}
+      }
+    }, function(reply) {
+      tu.azzert(reply.status === 'ok');
+
+      eb.send('test.persistor', {
+        collection: 'testcoll',
+        action: 'findone',
+        document: {
+          _id: '12345'
+        }
+      }, function(reply) {
+        tu.azzert(reply.status === 'ok');
+        // Upsert does not remove the name
+        tu.azzert(reply.result.name === 'roger');
+        // Age has changed
+        tu.azzert(reply.result.age === 1000);
+        tu.testComplete();
       });
     });
   });
@@ -460,8 +511,21 @@ function testCount() {
   });
 }
 
+function putConfig(cfg,name,defaultValue) {
+  var value=java.lang.System.getProperty('test.mongo.'+name,defaultValue);
+  if (value!=null)
+    cfg[name]=value;
+}
 tu.registerTests(this);
-var persistorConfig = {address: 'test.persistor', db_name: 'test_db'}
+var persistorConfig = {
+  address: 'test.persistor'
+};
+
+putConfig(persistorConfig,"db_name","test_db");
+putConfig(persistorConfig,"host","localhost");
+putConfig(persistorConfig,"username",null);
+putConfig(persistorConfig,"password",null);
+
 vertx.deployModule('vertx.mongo-persistor-v' + java.lang.System.getProperty('vertx.version'), persistorConfig, 1, function() {
   deleteAll();
   tu.appReady();

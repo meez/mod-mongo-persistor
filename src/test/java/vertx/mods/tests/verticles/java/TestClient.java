@@ -21,7 +21,7 @@ import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.framework.TestClientBase;
+import org.vertx.java.testframework.TestClientBase;
 
 /**
  *
@@ -41,7 +41,10 @@ public class TestClient extends TestClientBase {
     eb = vertx.eventBus();
     JsonObject config = new JsonObject();
     config.putString("address", "test.persistor");
-    config.putString("db_name", "test_db");
+    putConfig(config,"db_name","test_db");
+    putConfig(config,"host","localhost");
+    putConfig(config,"username",null);
+    putConfig(config,"password",null);
     container.deployModule("vertx.mongo-persistor-v" + System.getProperty("vertx.version"), config, 1, new Handler<String>() {
       public void handle(String res) {
         persistorID = res;
@@ -53,6 +56,13 @@ public class TestClient extends TestClientBase {
   @Override
   public void stop() {
     super.stop();
+  }
+  
+  /** Put a configuration variable with system override */
+  public void putConfig(JsonObject cfg, String name, String defaultValue) {
+    String value=System.getProperty("test.mongo."+name,defaultValue);
+    if (value!=null)
+      cfg.putString(name,value);
   }
 
   public void testPersistor() throws Exception {

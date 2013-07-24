@@ -17,7 +17,7 @@ package org.vertx.mods.tests;
  */
 
 import org.junit.Test;
-import org.vertx.java.framework.TestBase;
+import org.vertx.java.testframework.TestBase;
 import vertx.mods.tests.verticles.java.TestClient;
 
 /**
