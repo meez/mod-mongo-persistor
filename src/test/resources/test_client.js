@@ -118,6 +118,7 @@ function testUpsert() {
     }
   }, function(reply) {
     tu.azzert(reply.status === 'ok');
+    tu.azzert(reply.updatedExisting === false);
 
     // Now update it
     eb.send('test.persistor', {
@@ -132,6 +133,7 @@ function testUpsert() {
       }
     }, function(reply) {
       tu.azzert(reply.status === 'ok');
+      tu.azzert(reply.updatedExisting === true);
 
       eb.send('test.persistor', {
         collection: 'testcoll',
