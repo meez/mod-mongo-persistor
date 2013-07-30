@@ -114,7 +114,8 @@ function testUpsert() {
       '_id':'12345'
     },
     objNew: {
-      '$set': {'name':'roger','age':15}
+      '$set': {'name':'roger','age':15},
+      '$setOnInsert': {'pi':3.14}
     }
   }, function(reply) {
     tu.azzert(reply.status === 'ok');
@@ -129,7 +130,9 @@ function testUpsert() {
         '_id':'12345'
       },
       objNew: {
-        '$set': {'age':1000}
+        '$set': {'age':1000},
+	// Will not update
+        '$setOnInsert': {'pi':3.141592653}
       }
     }, function(reply) {
       tu.azzert(reply.status === 'ok');
@@ -147,7 +150,21 @@ function testUpsert() {
         tu.azzert(reply.result.name === 'roger');
         // Age has changed
         tu.azzert(reply.result.age === 1000);
-        tu.testComplete();
+	// Pi is original value
+	tu.azzert(reply.result.pi == 3.14);
+        
+        // Delete the document
+        eb.send('test.persistor', {
+          collection: 'testcoll',
+          action: 'delete',
+          matcher: {
+            _id: '12345'
+          }
+        }, function(reply) {
+          tu.azzert(reply.status === 'ok');
+          tu.azzert(reply.number === 1);
+          tu.testComplete();
+        });
       });
     });
   });
@@ -457,7 +474,9 @@ function testDelete() {
        name: 'mark'
      }
   }, function(reply) {
+
      tu.azzert(reply.status === 'ok');
+     tu.azzert(reply.number === 1);
   });
   eb.send('test.persistor', {
     collection: 'testcoll',
