@@ -140,6 +140,10 @@ test {
     systemProperty 'vertx.mongo.port', '10018'
     systemProperty 'vertx.mongo.database', '0vaZnY5bN8I2LRGIrnp2Dw'
   }
+  else {
+    // Otherwise allow properties to be set via command-line
+    systemProperties=System.properties
+  }
 
   systemProperty 'vertx.loadWithPlatformCL', 'false'
 
