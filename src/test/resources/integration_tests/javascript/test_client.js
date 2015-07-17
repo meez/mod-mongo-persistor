@@ -124,6 +124,55 @@ function testSave() {
   });
 }
 
+function testUpsert() {
+  // First upsert will insert
+  eb.send('test.persistor', {
+    collection: 'testcoll',
+    action: 'update',
+    upsert: true,
+    criteria: {
+      '_id':'12345'
+    },
+    objNew: {
+      '$set': {'name':'roger','age':15}
+    }
+  }, function(reply) {
+    vassert.assertEquals("ok",reply.status);
+    vassert.assertTrue(!reply.updatedExisting);
+
+    // Now update it
+    eb.send('test.persistor', {
+      collection: 'testcoll',
+      action: 'update',
+      upsert: true,
+      criteria: {
+        '_id':'12345'
+      },
+      objNew: {
+        '$set': {'age':1000}
+      }
+    }, function(reply) {
+      vassert.assertEquals("ok",reply.status);
+      vassert.assertTrue(reply.updatedExisting);
+
+      eb.send('test.persistor', {
+        collection: 'testcoll',
+        action: 'findone',
+        document: {
+          _id: '12345'
+        }
+      }, function(reply) {
+        vassert.assertEquals("ok",reply.status);
+        // Upsert does not remove the name
+        vassert.assertEquals("roger",reply.result.name);
+        // Age has changed
+        vassert.assertEquals(1000,reply.result.age,0);
+        vassert.testComplete();
+      });
+    });
+  });
+}
+
 function testFind() {
 
   eb.send('test.persistor', {
