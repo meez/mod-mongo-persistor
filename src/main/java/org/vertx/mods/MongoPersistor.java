@@ -72,7 +72,7 @@ public class MongoPersistor extends BusModBase implements Handler<Message<JsonOb
     useSSL = getOptionalBooleanConfig("use_ssl", false);
     useMongoTypes = getOptionalBooleanConfig("use_mongo_types", false);
 
-    logger.info("Connecting to '"+host+":"+port+"/"+dbName+" "+(username!=null?" as "+username:"anonymously"));
+    logger.debug("Connecting to '" + host + ":" + port + "/" + dbName + " " + (username != null ? " as " + username : "anonymously"));
 
     JsonArray seedsProperty = config.getArray("seeds");
 
@@ -259,7 +259,7 @@ public class MongoPersistor extends BusModBase implements Handler<Message<JsonOb
     if (res.getError() == null) {
       JsonObject reply = new JsonObject();
       reply.putNumber("number", res.getN());
-      reply.putBoolean("updatedExisting",res.isUpdateOfExisting());
+      reply.putBoolean("updatedExisting", res.isUpdateOfExisting());
       sendOK(message, reply);
     } else {
       sendError(message, res.getError());
